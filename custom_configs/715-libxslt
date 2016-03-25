@@ -1,0 +1,25 @@
+# 715-libxslt
+# 
+#
+#
+# Any comments you wish to add
+#
+
+PKG="libxslt"
+PKG_VERSION="libxslt-1.1.28.tar.gz"
+PKG_FILE="libxslt-1.1.28.tar.gz"
+URL="ftp://xmlsoft.org/libxslt/libxslt-1.1.28.tar.gz"
+MD5="9667bf6f9310b957254fdcf6596600b7"
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1=""
+
+( cat << "xEOFx"
+   ./configure --prefix=/usr --disable-static &&
+   make
+   #make -k check || true
+   make -j1 install
+   
+xEOFx
+) > tmp

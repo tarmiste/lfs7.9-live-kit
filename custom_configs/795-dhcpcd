@@ -1,0 +1,49 @@
+# 795-dhcpcd
+# 
+#
+#
+# dhcpcd is an implementation of the DHCP client specified in RFC2131.
+# This is useful for connecting your computer to a network which uses
+# DHCP to assign network addresses.
+#
+
+PKG="dhcpcd"
+PKG_VERSION="6.9.3"
+PKG_FILE="dhcpcd-${PKG_VERSION}.tar.xz"
+URL="http://roy.marples.name/downloads/dhcpcd/${PKG_FILE}"
+MD5="8357d023c4687d27bc6ea7964236b2a6"
+for i in PATCH{1..10}; do
+   unset $i
+done
+
+( cat << "xEOFx"
+
+./configure --libexecdir=/lib/dhcpcd \
+            --dbdir=/var/lib/dhcpcd  &&
+make
+
+make install
+
+# Add the following to boot scripts.
+#make install-service-dhcpcd
+
+# more configuration? 
+
+cat > /etc/sysconfig/ifconfig.eth0 << "EOF"
+ONBOOT="no"
+IFACE="eth0"
+SERVICE="dhcpcd"
+DHCP_START="-b -q"
+# static IP example:
+# DHCP_START="-b -q -S ip_address=192.168.0.10/24 -S routers=192.168.0.1"
+DHCP_STOP="-k"
+EOF
+
+cat > /etc/resolv.conf.head << "EOF"
+#  public servers
+nameserver 8.8.8.8
+#nameserver 208.67.220.220
+EOF
+
+xEOFx
+) > tmp

@@ -1,0 +1,106 @@
+# 997-create-host-scripts
+# 
+#
+#
+# Create host script needed to finish the live ISO.
+#
+
+PKG=""
+PKG_VERSION=""
+PKG_FILE=""
+URL=""
+MD5=""
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1=""
+
+( cat << "xEOFx"
+
+    mkdir -p /host_scripts
+
+#
+# create squash script
+#
+cat > /host_scripts/make_live_squashed_root.sh << "EOF"
+
+# Verify validity of $LFS variable.
+if [ -z "$LFS" ]
+then
+    echo LFS is not set!  Aborting...
+    exit 1
+fi
+
+echo 'Making squashed image of $LFS'
+rm -f root.sfs
+sudo mksquashfs $LFS root.sfs -comp xz
+EOF
+
+#
+# create live tree script
+#
+cat > /host_scripts/make_live_tree.sh << "EOF"
+
+# Verify validity of $LFS variable.
+if [ -z "$LFS" ]
+then
+    echo LFS is not set!  Aborting...
+    exit 1
+fi
+
+
+cat > isolinux.cfg << aEOFa
+DEFAULT menu.c32
+PROMPT 0
+MENU TITLE Select an option...
+TIMEOUT 300
+
+LABEL live
+    MENU LABEL ^Boot the live system ($(uname -m))
+    MENU DEFAULT
+    KERNEL /boot/$(uname -m)/vmlinuz
+    APPEND initrd=/boot/$(uname -m)/initram.fs quiet
+
+LABEL busybox
+    MENU LABEL ^Boot busybox ($(uname -m))
+    KERNEL /boot/$(uname -m)/vmlinuz
+    APPEND initrd=/boot/$(uname -m)/initram.fs quiet busybox
+
+LABEL harddisk
+    MENU LABEL Boot from first ^Hard disk
+    LOCALBOOT 0x80
+
+aEOFa
+
+sudo tar xf $LFS/sources/syslinux-4.06.tar.xz
+rm -fr live
+mkdir -p live/boot/{isolinux,$(uname -m)}
+cp -v syslinux-4.06/core/isolinux.bin live/boot/isolinux
+cp -v syslinux-4.06/com32/menu/menu.c32 live/boot/isolinux
+mv -v isolinux.cfg                 live/boot/isolinux
+
+cp -v root.sfs live/boot/$(uname -m)
+cp -v $LFS/boot/vmlinuz-*-lfs-*   live/boot/$(uname -m)/vmlinuz
+cp -v $LFS/boot/id_label live/boot/$(uname -m)
+cp -v $LFS/boot/initram.fs live/boot/$(uname -m)/initram.fs
+
+EOF
+
+cat > /host_scripts/make_live_iso.sh << "EOF"
+
+genisoimage -V "LFS_$(uname -m)_$(date +%Y%m%d)" -o lfslive-$(uname -m)_$(date +%Y%m%d).iso     \
+        -b boot/isolinux/isolinux.bin \
+        -c boot.cat                   \
+        -no-emul-boot                 \
+        -boot-load-size 4             \
+        -boot-info-table              \
+        -joliet -l -R                 \
+        live
+
+isohybrid lfslive-*_*.iso
+EOF
+
+chmod +x /host_scripts/*
+
+xEOFx
+) > tmp

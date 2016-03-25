@@ -1,0 +1,31 @@
+# 680-python2
+# 
+#
+#
+# Any comments you wish to add
+#
+
+PKG="python2"
+PKG_VERSION="Python-2.7.11.tar.xz"
+PKG_FILE="Python-2.7.11.tar.xz"
+URL="https://www.python.org/ftp/python/2.7.11/Python-2.7.11.tar.xz"
+MD5="1dbcc848b4cd8399a8199d000f9f823c"
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1=""
+
+( cat << "xEOFx"
+   ./configure --prefix=/usr       \
+               --enable-shared     \
+               --with-system-expat \
+               --with-system-ffi   \
+               --enable-unicode=ucs4 &&
+   make
+   #make -k test || true
+   make -j1 install &&
+   chmod -v 755 /usr/lib/libpython2.7.so.1.0
+   install -v -dm755 /usr/share/doc/python-2.7.11 &&
+
+xEOFx
+) > tmp

@@ -1,0 +1,40 @@
+# 720-curl
+# 
+#
+#
+# Any comments you wish to add
+#
+
+PKG="curl"
+PKG_VERSION="curl-7.47.1.tar.lzma"
+PKG_FILE="curl-7.47.1.tar.lzma"
+URL="https://curl.haxx.se/download/curl-7.47.1.tar.lzma"
+MD5="8242c073d8e5fc1c2a1aa946f1e903a4"
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1=""
+
+( cat << "xEOFx"
+   ./configure --prefix=/usr              \
+               --disable-static           \
+               --enable-threaded-resolver &&
+   make
+   #make -k test || true
+   make -j1 install &&
+   
+   cp -a docs docs-save       &&
+   rm -rf docs/examples/.deps &&
+   
+   find docs \( -name Makefile\* \
+             -o -name \*.1       \
+             -o -name \*.3 \)    \
+             -exec rm {} \;      &&
+   install -v -d -m755 /usr/share/doc/curl-7.47.1 &&
+   cp -v -R docs/*     /usr/share/doc/curl-7.47.1 &&
+   
+   rm -rf docs &&
+   mv -i docs-save doc
+   
+xEOFx
+) > tmp

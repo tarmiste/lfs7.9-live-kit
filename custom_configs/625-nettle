@@ -1,0 +1,27 @@
+# 625-nettle
+# 
+#
+#
+# Any comments you wish to add
+#
+
+PKG="nettle"
+PKG_VERSION="nettle-3.2.tar.gz"
+PKG_FILE="nettle-3.2.tar.gz "
+URL="ftp://ftp.gnu.org/gnu/nettle/nettle-3.2.tar.gz"
+MD5="afb15b4764ebf1b4e6d06c62bd4d29e4"
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1=""
+
+( cat << "xEOFx"
+   ./configure --prefix=/usr &&
+   make
+   #make -k check || true
+   make -j1 install &&
+   chmod   -v   755 /usr/lib/lib{hogweed,nettle}.so &&
+   install -v -m755 -d /usr/share/doc/nettle-3.2 &&
+   install -v -m644 nettle.html /usr/share/doc/nettle-3.2
+xEOFx
+) > tmp

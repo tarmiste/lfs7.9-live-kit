@@ -1,0 +1,57 @@
+# 660-openssh
+# 
+#
+#
+# Any comments you wish to add
+#
+
+PKG="openssh"
+PKG_VERSION="openssh-7.1p2.tar.gz"
+PKG_FILE="openssh-7.1p2.tar.gz"
+URL="http://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-7.1p2.tar.gz"
+MD5="4d8547670e2a220d5ef805ad9e47acf2"
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1=""
+
+( cat << "xEOFx"
+   install  -v -m700 -d /var/lib/sshd &&
+   chown    -v root:sys /var/lib/sshd &&
+   
+   groupadd -g 50 sshd        &&
+   useradd  -c 'sshd PrivSep' \
+            -d /var/lib/sshd  \
+            -g sshd           \
+            -s /bin/false     \
+            -u 50 sshd
+   ./configure --prefix=/usr                     \
+               --sysconfdir=/etc/ssh             \
+               --with-md5-passwords              \
+               --with-privsep-path=/var/lib/sshd &&
+   make
+   #make -k tests || true
+   make -j1 install &&
+   install -v -m755    contrib/ssh-copy-id /usr/bin     &&
+   
+   install -v -m644    contrib/ssh-copy-id.1 \
+                       /usr/share/man/man1              &&
+   install -v -m755 -d /usr/share/doc/openssh-7.1p2     &&
+   install -v -m644    INSTALL LICENCE OVERVIEW README* \
+                       /usr/share/doc/openssh-7.1p2
+   
+   #echo "PermitRootLogin no" >> /etc/ssh/sshd_config
+   
+   #ssh-keygen &&
+   #ssh-copy-id -i ~/.ssh/id_rsa.pub **EDITMEREMOTE_USERNAMEEDITME**@**EDITMEREMOTE_HOSTNAMEEDITME**
+   
+   #echo "PasswordAuthentication no" >> /etc/ssh/sshd_config &&
+   #echo "ChallengeResponseAuthentication no" >> /etc/ssh/sshd_config
+   
+   #sed 's@d/login@d/sshd@g' /etc/pam.d/login > /etc/pam.d/sshd &&
+   #chmod 644 /etc/pam.d/sshd &&
+   #echo "UsePAM yes" >> /etc/ssh/sshd_config
+
+xEOFx
+) > tmp
+

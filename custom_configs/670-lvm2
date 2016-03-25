@@ -1,0 +1,39 @@
+# 670-lvm2
+# 
+#
+#
+# Any comments you wish to add
+#
+
+PKG="lvm2"
+PKG_VERSION="LVM2.2.02.141.tgz"
+PKG_FILE="LVM2.2.02.141.tgz"
+URL="ftp://sources.redhat.com/pub/lvm2/releases/LVM2.2.02.141.tgz"
+MD5="0bb6261f7ecb9ef70fd773c6a952de67"
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1=""
+
+( cat << "xEOFx"
+   SAVEPATH=$PATH                  &&
+   PATH=$PATH:/sbin:/usr/sbin      &&
+   ./configure --prefix=/usr       \
+               --exec-prefix=      \
+               --enable-applib     \
+               --enable-cmdlib     \
+               --enable-pkgconfig  \
+               --enable-udev_sync  &&
+   make                            &&
+   PATH=$SAVEPATH                  &&
+   unset SAVEPATH
+   make -j1 -C tools install_dmsetup_dynamic &&
+   make -j1 -C udev  install                 &&
+   make -j1 -C libdm install
+   #make -k check_local || true
+   #make -k -C test help || true
+   #make -k  || true
+   make -j1 install
+
+xEOFx
+) > tmp

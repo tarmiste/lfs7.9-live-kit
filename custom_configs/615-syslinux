@@ -1,0 +1,48 @@
+# 615-syslinux
+# 
+#
+#
+# Any comments you wish to add
+#
+
+PKG="syslinux"
+PKG_VERSION="syslinux-4.06.tar.xz"
+PKG_FILE="syslinux-4.06.tar.xz"
+URL="http://www.kernel.org/pub/linux/utils/boot/syslinux/syslinux-4.06.tar.xz"
+MD5="77d33140860621cd850c3a7ab0ebb7d6"
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1=""
+
+( cat << "xEOFx"
+
+#
+# Create isolinux configuration file for later use.   
+# moved to host scripts...  remove this 
+#
+#cat > /boot/isolinux.cfg << EOF
+#DEFAULT menu.c32
+#PROMPT 0
+#MENU TITLE Select an option...
+#TIMEOUT 300
+#
+#LABEL live
+#    MENU LABEL ^Boot the live system ($(uname -m))
+#    MENU DEFAULT
+#    KERNEL /boot/$(uname -m)/vmlinuz
+#    APPEND initrd=/boot/$(uname -m)/initram.fs rootdelay=4 quiet
+#
+#LABEL busybox
+#    MENU LABEL ^Boot busybox ($(uname -m))
+#    KERNEL /boot/$(uname -m)/vmlinuz
+#    APPEND initrd=/boot/$(uname -m)/initram.fs quiet busybox
+#
+#LABEL harddisk
+#    MENU LABEL Boot from first ^Hard disk
+#    LOCALBOOT 0x80
+#
+#EOF
+
+xEOFx
+) > tmp

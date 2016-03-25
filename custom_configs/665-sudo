@@ -1,0 +1,33 @@
+# 665-sudo
+# 
+#
+#
+# Any comments you wish to add
+#
+
+PKG="sudo"
+PKG_VERSION="sudo-1.8.15.tar.gz"
+PKG_FILE="sudo-1.8.15.tar.gz"
+URL="http://www.sudo.ws/dist/sudo-1.8.15.tar.gz"
+MD5="7cf6b9b76d0478a572432bed481dd7b5"
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1=""
+
+( cat << "xEOFx"
+   ./configure --prefix=/usr              \
+               --libexecdir=/usr/lib      \
+               --with-secure-path         \
+               --with-all-insults         \
+               --with-env-editor          \
+               --docdir=/usr/share/doc/sudo-1.8.15 \
+               --with-passprompt="[sudo] password for %p" &&
+   make
+   #env LC_ALL=C make -k check 2>&1 | tee ../make-check.log || true
+   #make -k  || true
+   make -j1 install &&
+   ln -sfv libsudo_util.so.0.0.0 /usr/lib/sudo/libsudo_util.so.0
+
+xEOFx
+) > tmp

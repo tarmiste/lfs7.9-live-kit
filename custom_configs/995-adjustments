@@ -1,0 +1,76 @@
+# 995-adjustments
+# 
+#
+#
+# Final adjustments.
+#
+
+PKG=""
+PKG_VERSION=""
+PKG_FILE=""
+URL=""
+MD5=""
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1=""
+
+( cat << "xEOFx"
+
+    strip --strip-all /usr/libexec/gcc/*/*/collect2
+    strip --strip-all /usr/libexec/gcc/*/*/cc1
+    strip --strip-all /usr/libexec/gcc/*/*/cc1plus
+    strip --strip-all /usr/libexec/gcc/*/*/lto1
+    strip --strip-all /usr/libexec/gcc/*/*/lto-wrapper
+    cp /usr/bin/strip ./ostrip
+    ./ostrip --strip-all /usr/bin/* || true
+    ./ostrip --strip-all /usr/sbin/* || true
+    rm -f ./ostrip
+    rm -fr /tools
+    rm -fr /usr/share/info
+    ldconfig
+
+cat > /etc/issue << "EOF"
+Welcome to LFS live.   
+
+To get started, login as builder (with password of builder) and read the README.LFSLIVE.USER file.
+EOF
+
+cat > /home/builder/README.LFSLIVE.USER << "EOF"
+
+This needs writing.
+
+add yourself to the sudoers list
+
+
+jhalfs can be obtained by:
+svn co svn://svn.linuxfromscratch.org/ALFS/jhalfs/trunk jhalfs
+
+Various LFS/BLFS books are available in /TBA
+
+
+ To connect to an access point that uses a password, you need to put the pre-shared key in /etc/sysconfig/wpa_supplicant-wifi0.conf. SSID is the string that the access point/router transmits to identify itself. Run the following command as the root user:
+
+wpa_passphrase SSID SECRET_PASSWORD > /etc/sysconfig/wpa_supplicant-wifi0.conf
+
+/etc/sysconfig/wpa_supplicant-wifi0.conf can hold the details of several access points. When wpa_supplicant is started, it will scan for the SSIDs it can see and choose the appropriate password to connect.
+
+If you want to connect to an access point that isn't password protected, put an entry like this in /etc/sysconfig/wpa_supplicant-wifi0.conf. Replace "Some-SSID" with the SSID of the access point/router.
+
+network={
+  ssid="Some-SSID"
+  key_mgmt=NONE
+}
+
+
+EOF
+
+uname -m > /LFSLIVE
+date >> /LFSLIVE
+echo -n 'LFS Base Version: ' >> /LFSLIVE
+# doesn't exist yet... cat /etc/lfs-release >> /LFSLIVE
+echo 'TBA' >> /LFSLIVE
+
+
+xEOFx
+) > tmp

@@ -1,0 +1,225 @@
+# 997-ppc-create-host-scripts
+# 
+#
+#
+# Create host script needed to finish the live ISO.
+#
+
+PKG=""
+PKG_VERSION=""
+PKG_FILE=""
+URL=""
+MD5=""
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1=""
+
+( cat << "xEOFx"
+
+    mkdir -p /host_scripts
+
+#
+# create squash script
+#
+cat > /host_scripts/make_live_squashed_root.sh << "EOF"
+
+# Verify validity of $LFS variable.
+if [ -z "$LFS" ]
+then
+    echo LFS is not set!  Aborting...
+    exit 1
+fi
+
+echo 'Making squashed image of $LFS'
+rm -f root.sfs
+sudo mksquashfs $LFS root.sfs -comp xz
+EOF
+
+#
+# create live tree script
+#
+cat > /host_scripts/make_live_tree.sh << "EOF"
+
+# Verify validity of $LFS variable.
+if [ -z "$LFS" ]
+then
+    echo LFS is not set!  Aborting...
+    exit 1
+fi
+
+rm -fr live
+mkdir -p live/boot/$(uname -m)
+mkdir -p live/ppc/mac
+mkdir -p live/ppc/ppc32
+mkdir -p live/ppc/ppc64
+
+cp -v root.sfs live/boot/$(uname -m)
+cp -v $LFS/boot/vmlinuz-*-lfs-*   live/boot/vmlinux
+cp -v $LFS/boot/id_label live/boot/
+cp -v $LFS/boot/id_label live/boot/$(uname -m)
+cp -v $LFS/boot/initram.fs live/boot/initram.fs
+
+#
+cp $LFS/usr/lib/yaboot/yaboot live/ppc/mac
+#
+# Create an open firmware configuration file.
+#
+cat > live/ppc/mac/ofboot.b << "aEOFa"
+<CHRP-BOOT>
+<COMPATIBLE>
+MacRISC MacRISC2 MacRISC3 MacRISC4
+</COMPATIBLE>
+<DESCRIPTION>
+LFS CD PPC bootloader
+</DESCRIPTION>
+<BOOT-SCRIPT>
+" screen" output
+load-base release-load-area
+boot cd:,\ppc\mac\yaboot conf=cd:,\ppc\ppc32\yaboot.conf
+</BOOT-SCRIPT>
+<OS-BADGE-ICONS>
+1010
+f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8
+f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f80000000000000000000000000000f8
+f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8
+ffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffff
+</OS-BADGE-ICONS>
+</CHRP-BOOT>
+aEOFa
+
+#
+# Create a yaboot message file
+#
+case $(uname -m) in
+    ppc64)  
+
+cat > live/ppc/ppc32/yaboot.msg << "aEOFa"
+MacRISC type machine...
+____________________________________________________
+
+
+GNU/Linux LFS PPC - 64bit
+
+aEOFa
+    ;;
+
+    *) 
+cat > live/ppc/ppc32/yaboot.msg << "aEOFa"
+MacRISC type machine...
+____________________________________________________
+
+
+GNU/Linux LFS PPC - 32bit
+
+aEOFa
+
+    ;;
+esac
+
+#
+# Create a yaboot configuration file.
+#
+cat > live/ppc/ppc32/yaboot.conf << "aEOFa"
+message=/ppc/ppc32/yaboot.msg
+delay=20
+
+init-message = "\nWelcome to LFS Live \nHit <TAB> for boot options.\n\n"
+timeout=150
+default=live
+#enablecdboot
+enableofboot
+#enablenetboot
+
+image=/boot/vmlinux
+        label=live
+        initrd=/boot/initram.fs
+        append="rootdelay=4 init=/init "
+        read-write
+        pause-after
+
+image=/boot/vmlinux
+        label=busybox
+        initrd=/boot/initram.fs
+        append="rootdelay=1 init=/init busybox"
+        read-write
+        pause-after
+aEOFa
+
+EOF
+
+#
+# Make generate ISO script
+#
+cat > /host_scripts/make_live_iso.sh << "EOF"
+
+cat > live/boot/map.hfs << "aEOFa"
+# ext.  xlate  creator  type    comment
+.b Raw 'chrp' 'tbxi' "bootstrap"
+yaboot Raw 'unix' 'boot' "bootstrap"
+.conf Ascii 'unix' 'text' "config"
+.msg Ascii 'unix' 'text' "text"
+* Raw '????' '????' "unknown" 
+aEOFa
+#
+#
+#
+genisoimage -r -V "LFS_$(uname -m)_$(date +%Y%m%d)" -o lfslive-$(uname -m)_$(date +%Y%m%d).iso     \
+        -iso-level 4  \
+        -chrp-boot -hfs \
+	-part -probe -no-desktop \
+	-hfs-bless live/ppc/mac \
+        -map live/boot/map.hfs \
+	-b ppc/mac/yaboot -no-emul-boot \
+	-hide-rr-moved \
+        live
+EOF
+
+chmod +x /host_scripts/*
+
+xEOFx
+) > tmp

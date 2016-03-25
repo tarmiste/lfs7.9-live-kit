@@ -1,0 +1,37 @@
+# 695-sgml-common
+# 
+#
+#
+# Any comments you wish to add
+#
+
+PKG="sgml-common"
+PKG_VERSION="sgml-common-0.6.3.tgz"
+PKG_FILE="sgml-common-0.6.3.tgz"
+URL="ftp://sources.redhat.com/pub/docbook-tools/new-trials/SOURCES/sgml-common-0.6.3.tgz"
+MD5="103c9828f24820df86e55e7862e28974"
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1="http://www.linuxfromscratch.org/patches/blfs/svn/sgml-common-0.6.3-manpage-1.patch 645f3c898abd270a9143036824ae121a"
+
+( cat << "xEOFx"
+   patch -Np1 -i ../sgml-common-0.6.3-manpage-1.patch &&
+   autoreconf -f -i
+   ./configure --prefix=/usr --sysconfdir=/etc &&
+   make
+   make -j1 docdir=/usr/share/doc install &&
+   
+   install-catalog --add /etc/sgml/sgml-ent.cat \
+       /usr/share/sgml/sgml-iso-entities-8879.1986/catalog &&
+   
+   install-catalog --add /etc/sgml/sgml-docbook.cat \
+       /etc/sgml/sgml-ent.cat
+   install-catalog --remove /etc/sgml/sgml-ent.cat \
+       /usr/share/sgml/sgml-iso-entities-8879.1986/catalog &&
+   
+   install-catalog --remove /etc/sgml/sgml-docbook.cat \
+       /etc/sgml/sgml-ent.cat
+   
+xEOFx
+) > tmp

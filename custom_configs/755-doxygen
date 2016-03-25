@@ -1,0 +1,37 @@
+# 755-doxygen
+# 
+#
+#
+# Any comments you wish to add
+#
+
+PKG="doxygen"
+PKG_VERSION="doxygen-1.8.11.src.tar.gz"
+PKG_FILE="doxygen-1.8.11.src.tar.gz"
+URL="ftp://ftp.stack.nl/pub/doxygen/doxygen-1.8.11.src.tar.gz"
+MD5="f4697a444feaed739cfa2f0644abc19b"
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1=""
+
+( cat << "xEOFx"
+   mkdir -v build &&
+   cd       build &&
+   
+   cmake -G "Unix Makefiles"         \
+         -DCMAKE_BUILD_TYPE=Release  \
+         -DCMAKE_INSTALL_PREFIX=/usr \
+         .. &&
+   
+   make
+   #make -k tests || true
+
+   #cmake -DDOC_INSTALL_DIR=share/doc/doxygen-1.8.11 -Dbuild_doc=ON .. &&
+   #make docs
+
+   make -j1 install &&
+   install -vm644 ../doc/*.1 /usr/share/man/man1
+   
+xEOFx
+) > tmp

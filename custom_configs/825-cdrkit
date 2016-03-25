@@ -1,0 +1,27 @@
+# 825-cdrkit
+# 
+#
+#
+# Any comments you wish to add
+#
+
+PKG="cdrkit"
+PKG_VERSION="1.1.11"
+PKG_FILE="cdrkit-1.1.11.tar.gz"
+URL="http://distfiles.lesslinux.org/cdrkit-1.1.11.tar.gz"
+
+MD5="efe08e2f3ca478486037b053acd512e9"
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1=
+
+( cat << "xEOFx"
+
+	sed -i 's:share/\(man\):\1:' 3rd-party/dirsplit/CMakeLists.txt
+	cmake -DCMAKE_INSTALL_PREFIX=/usr -DMANSUBDIR=man
+# is there a test?
+	make install
+
+xEOFx
+) > tmp

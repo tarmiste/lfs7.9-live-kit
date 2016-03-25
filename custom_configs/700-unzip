@@ -1,0 +1,24 @@
+# 700-unzip
+# 
+#
+#
+# Any comments you wish to add
+#
+
+PKG="unzip"
+PKG_VERSION="unzip60.tar.gz"
+PKG_FILE="unzip60.tar.gz"
+URL="http://downloads.sourceforge.net/infozip/unzip60.tar.gz"
+MD5="62b490407489521db863b523a7f86375"
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1=""
+
+( cat << "xEOFx"
+   make -f unix/Makefile generic
+   make -j1 prefix=/usr MANDIR=/usr/share/man/man1 \
+    -f unix/Makefile install
+
+xEOFx
+) > tmp

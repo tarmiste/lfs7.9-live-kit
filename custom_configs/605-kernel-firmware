@@ -1,0 +1,21 @@
+# 605-kernel-firmware
+# 
+#
+#
+
+PKG="kernel-firmware"
+PKG_VERSION="4.4.2"
+PKG_FILE="linux-${PKG_VERSION}.tar.xz"
+URL="https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.4.2.tar.xz"
+MD5="d1b8be99e6c12cbc52b2af0520d550bb"
+for i in PATCH{1..10}; do
+   unset $i
+done
+
+( cat << "xEOFx"
+
+    make mrproper
+    make firmware_install
+
+xEOFx
+) > tmp

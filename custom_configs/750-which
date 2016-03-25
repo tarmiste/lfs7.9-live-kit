@@ -1,0 +1,23 @@
+# 750-which
+# 
+#
+#
+# Any comments you wish to add
+#
+
+PKG="which"
+PKG_VERSION="which-2.21.tar.gz"
+PKG_FILE="which-2.21.tar.gz"
+URL="ftp://ftp.gnu.org/gnu/which/which-2.21.tar.gz"
+MD5="097ff1a324ae02e0a3b0369f07a7544a"
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1=""
+
+( cat << "xEOFx"
+    ./configure --prefix=/usr &&
+    make
+    make install
+xEOFx
+) > tmp

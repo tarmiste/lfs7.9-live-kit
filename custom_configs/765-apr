@@ -1,0 +1,27 @@
+# 765-apr
+# 
+#
+#
+# Any comments you wish to add
+#
+
+PKG="apr"
+PKG_VERSION="apr-1.5.2.tar.bz2"
+PKG_FILE="apr-1.5.2.tar.bz2"
+URL="http://archive.apache.org/dist/apr/apr-1.5.2.tar.bz2"
+MD5="4e9769f3349fe11fc0a5e1b224c236aa"
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1=""
+
+( cat << "xEOFx"
+   ./configure --prefix=/usr    \
+               --disable-static \
+               --with-installbuilddir=/usr/share/apr-1/build &&
+   make
+   #make -k test || true
+   make -j1 install
+
+xEOFx
+) > tmp

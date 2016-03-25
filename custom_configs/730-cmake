@@ -1,0 +1,29 @@
+# 730-cmake
+# 
+#
+#
+# Any comments you wish to add
+#
+
+PKG="cmake"
+PKG_VERSION="cmake-3.4.3.tar.gz"
+PKG_FILE="cmake-3.4.3.tar.gz"
+URL="http://www.cmake.org/files/v3.4/cmake-3.4.3.tar.gz"
+MD5="4cb3ff35b2472aae70f542116d616e63"
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1=""
+
+( cat << "xEOFx"
+   ./bootstrap --prefix=/usr       \
+               --system-libs       \
+               --mandir=/share/man \
+               --no-system-jsoncpp \
+               --docdir=/share/doc/cmake-3.4.3 &&
+   make
+   #make -k  || true
+   make -j1 install
+
+xEOFx
+) > tmp

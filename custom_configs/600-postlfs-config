@@ -1,0 +1,59 @@
+# 600-postlfs-config
+#
+# Perform post LFS configuration steps needed for the live system.
+#
+
+PKG=""
+PKG_VERSION=""
+PKG_FILE=""
+URL=""
+MD5=""
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1=""
+
+( cat << "xEOFx"
+
+#
+# set root password to none
+#
+    sed -i 's@root:x:0:0:root:@root::0:0:root:@' /etc/passwd
+
+#
+# Add builder account with passwd of builder
+#
+    username="builder"
+    password="builder"
+    pass=$(perl -e 'print crypt($ARGV[0], "password")' $password)
+    useradd -m -p $pass $username
+
+#
+# Disable hard disk mounts in fstab
+#
+    sed -i 's@^/dev@#/dev@' /etc/fstab
+
+#
+# Disable auto start of eth0
+#
+    sed -i 's@ONBOOT="yes"@ONBOOT="no"@' /etc/sysconfig/ifconfig.eth0
+
+#
+# Comment out LFS stuff in resolv.conf and use Googles name server instead.
+#
+    sed -i 's@^@#@' /etc/resolv.conf
+cat >> /etc/resolv.conf << EOF
+nameserver 8.8.8.8      # Google public nameserver
+EOF
+
+#
+# Set hostname to lfs_live
+#
+cat > /etc/hostname << EOF
+lfs_live
+EOF
+
+    ldconfig
+
+xEOFx
+) > tmp

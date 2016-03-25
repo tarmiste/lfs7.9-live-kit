@@ -1,0 +1,23 @@
+# 800-wireless_tools
+# 
+#
+#
+# Any comments you wish to add
+#
+
+PKG="wireless_tools"
+PKG_VERSION="wireless_tools.29.tar.gz"
+PKG_FILE="wireless_tools.29.tar.gz"
+URL="http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/wireless_tools.29.tar.gz"
+MD5="e06c222e186f7cc013fd272d023710cb"
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1=""
+
+( cat << "xEOFx"
+   make
+   make -j1 PREFIX=/usr INSTALL_MAN=/usr/share/man install
+
+xEOFx
+) > tmp

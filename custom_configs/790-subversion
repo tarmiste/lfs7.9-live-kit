@@ -1,0 +1,36 @@
+# 790-subversion
+# 
+#
+#
+# Any comments you wish to add
+#
+
+PKG="subversion"
+PKG_VERSION="subversion-1.9.3.tar.bz2"
+PKG_FILE="subversion-1.9.3.tar.bz2"
+URL="http://www.apache.org/dist/subversion/subversion-1.9.3.tar.bz2"
+MD5="243036eb28b50ce517fc228eb3250add"
+for i in PATCH{1..10}; do
+   unset $i
+done
+PATCH1=""
+
+( cat << "xEOFx"
+   ./configure --prefix=/usr    \
+               --disable-static \
+               --with-apache-libexecdir &&
+   make
+   #make -k check || true
+   #make -k check-javahl || true
+   #make -k check-swig-pl || true
+   #make -k check-swig-py || true
+   #make -k check-swig-rb || true
+   #make -k check-swig-rb || true
+   make -j1 install &&
+   install -v -m755 -d /usr/share/doc/subversion-1.9.3 &&
+   cp      -v -R       doc/* \
+                       /usr/share/doc/subversion-1.9.3
+   
+
+xEOFx
+) > tmp
