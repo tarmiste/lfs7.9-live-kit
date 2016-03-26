@@ -30,6 +30,13 @@ PREREQUISITES:
 
    The user should be familiar with LFS and jhalfs.  
 
+   All building is done by a normal user with sudo permissions.   Do
+   not build the live image as root.   
+
+   The host system architecture must match the desired architecture of
+   the live image.  i.e.  an x86_64 live image must be built on a
+   x86_64 host, and not on a 32 bit host.
+
    The host system must comply with the host system requirements 
    described in the LFS book.
 
@@ -39,7 +46,7 @@ PREREQUISITES:
    In addition to the LFS/jhalfs host system requirements, this package
    requires the following host tools:
 
-   1) mksquashfs version 4.x.
+   1) mksquashfs version 4.x.   version 3.x will not work.
 
    2) genisoimage.   
 
@@ -47,9 +54,13 @@ PREREQUISITES:
       use on a USB flash drive.   It can be omitted if only a CD bootable
       image is needed.
 
+   Before beginning the live build, check for the existence of these
+   host tools and install them if needed.
+
    
 
 LFSLIVE_PREP.SH:
+
 
    From the top of the lfs7.9-live-kit tree, run the following command:
 
@@ -83,5 +94,97 @@ LFSLIVE_PREP.SH:
 
 LFSLIVE BUILD:
 
-   2) cd to the lfs..._host/jhalfs directory and run jhalfs to build
-      the LFS system.
+   Do: "cd ~HOME/lfs79live_host" 
+
+   Find the tar archive of the LFS 7.9 book (xml format).   It can
+   be unpacked and used as the book for jhalfs if needed.   Alternatively,
+   jhalfs can be configured to download the book from the LFS website.  In
+   this case, the local copy of the LFS 7.9 is not needed and can be 
+   ignored.
+
+   If, and only if,  building for PowerPC, then unpack the LFS 7.9 book 
+   tarball and apply the ppc book patch to it.
+
+   Find the live kernel config (*-live-config).   It will be used by
+   jhalfs during the kernel build.
+
+   Next do: "cd jhalfs ; make clean; make"
+
+   Select the needed jhalfs menu options:
+
+   1) Select local working copy of LFS book and point it to the local copy
+      of the LFS book.  
+
+   2) Select custom tools.  The prep script already populated the jhalfs
+      custom/config directory with the scripts needed to build the live
+      image.
+
+   3) Select build directory of /mnt/lfs79live_target.
+
+   4) Select download packages.   
+
+   5) Select run Makefile.
+
+   6) Select build kernel and provide the path to the live kernel config.
+
+   7) It is prudent to select all final system tests.
+
+   8) It may be helpful to select build all locales.
+
+   exit from jhalfs and let it run the build.   After some hours 
+   (or days), it will complete.   If it fails, fix the problem and 
+   then finish the build.
+
+
+
+HOST LIVE BUILD
+
+   Upon completion of the jhalfs build, there remains several tasks
+   that must be completed on the host (rather than in the chroot).
+
+   It may be prudent to reboot the host machine at this point before
+   running the host scripts.
+
+   The jhalfs build has created a host_scripts directory and placed
+   3 host scripts in it:
+
+   /mnt/lfs78live_target/host_scripts
+
+   To run the host scripts, do:
+
+   export LFS=/mnt/lfs79live_target
+
+   $LFS/host_scripts/make_live_squashed_root.sh
+
+   $LFS/host_scripts/make_live_tree.sh
+
+   $LFS/host_scripts/make_live_iso.sh
+
+
+   The above will create a live image that includes all sources.   If
+   the sources are not needed in the live image and it is desirable 
+   to reduce the size of the live image, then move the sources before 
+   the make_live_squashed_root step and move them back after.  e.g:
+
+   sudo mv $LFS/sources /mnt/savelfs79sources
+
+   $LFS/host_scripts/make_live_squashed_root.sh
+
+   sudo mv /mnt/savelfs79sources $LFS/sources 
+   
+   $LFS/host_scripts/make_live_tree.sh
+
+   $LFS/host_scripts/make_live_iso.sh
+
+ 
+
+The resulting live image will be found in a file of the following format:
+
+lfslive-<ARCH>_<DATE>.iso
+
+It can be burned to cd or written to a USB flash drive (USB flash drive
+not supported for PowerPC).
+
+
+
+
