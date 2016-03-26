@@ -37,6 +37,13 @@ license follows.
 The init.sh ramdisk script in this package is derived from the LFSscript
 init.sh script.
 
+--------------------------------------------------------------------------
+Debian: (www.debian.org)
+
+ALFS is licensed under GPL version 2.   A copy of the license follows.
+
+The yaboot binary tarball in this package is derived from the Debian
+yaboot package.
 
 --------------------------------------------------------------------------
 All original material in the package is Copyright Tom Armistead 2016 and
