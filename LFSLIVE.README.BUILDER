@@ -2,18 +2,21 @@
 
 OVERVIEW:
 
-   Building a live image consists of the following steps:
+   Building a live image consists of the following steps.  All of these
+   steps are done as non-root user (with sudo priveleges)::
 
    0) Obtain the lfs7.9-live-kit.  (Git clone it or download and unzip the zip file)
 
-      lfs7.9-live-kit provides various scripts and config files that are
+      The lfs7.9-live-kit provides various scripts and config files that are
       useful for creating the live image.
      
-   1) Execute the lfs7.9-live-kit/lfslive_prep.sh script.   
+   1) cd to the lfs7.9-live-kit directory and run the lfslive_prep.sh script.   
  
       This script prepares a target directory and a host directory and
       populates the directories with various various scripts and 
       config files that are useful for creating the live image.
+
+      
       
    2) cd to the lfs..._host/jhalfs directory and run jhalfs to build
       the LFS system.
@@ -62,9 +65,12 @@ PREREQUISITES:
 LFSLIVE_PREP.SH:
 
 
-   From the top of the lfs7.9-live-kit tree, run the following command:
+   In the lfs7.9-live-kit directory, run the following command:
 
-   ./lfs7.9-live-kit/lfslive_prep.sh
+   ./lfslive_prep.sh
+
+   The user must have write permission on /mnt for this script to 
+   succeed.
 
    The lfslive_prep.sh script creates both a directory to contain
    a LFS live host build area and another directory to contain
