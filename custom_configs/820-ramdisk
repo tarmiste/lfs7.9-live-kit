@@ -258,9 +258,17 @@ exec switch_root -c /dev/console ${ROOT} /sbin/init
 
 EOF
     #cd /sources
+    mkdir -pv mnt_init/{bin,boot,lib/modules}
+
     echo "LFS Live CD" >id_label
-    mkdir -pv mnt_init/{bin,boot}
     cp -v id_label mnt_init/boot
+    
+# Populate selected modules (assumes that only 1 version of modules is present...):
+    MOD_VER=`ls /lib/modules`
+    find /lib/modules/$MOD_VER/kernel/lib -print |cpio -pdvum mnt_init
+    find /lib/modules/$MOD_VER/kernel/drivers/{block,hid,scsi,usb} -print |cpio -pdvum mnt_init
+    #depmod -b mnt_init $MOD_VER
+
     cp -v /bin/busybox mnt_init/bin
     cp init.sh mnt_init/init
     sed -i "s/<ARCH>/$(uname -m)/g" mnt_init/init
