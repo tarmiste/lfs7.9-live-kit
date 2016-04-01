@@ -187,8 +187,17 @@ if [ `grep -c "busybox" /proc/cmdline` -ne "0" ]; then
 else
 # Delay a bit to allow devices to start up 
 # (not needed if user has invoked busybox)
-    echo "Waiting 10 seconds for devices to start."
-    busybox sleep 10
+    case $(uname -m) in
+    ppc)
+        echo "Waiting 15 seconds for devices to start."
+        busybox sleep 15
+    ;;
+
+    *)
+        echo "Waiting 10 seconds for devices to start."
+        busybox sleep 10
+    ;;
+    esac
 fi
 
 busybox mdev -s
