@@ -276,11 +276,11 @@ chmod u+x /usr/sbin/remove-expired-certs.sh
    unset URL
    SSLDIR=/etc/ssl                                              &&
    remove-expired-certs.sh certs                                &&
-   install -d \${SSLDIR}/certs                                   &&
-   cp -v certs/*.pem \${SSLDIR}/certs                            &&
+   install -d ${SSLDIR}/certs                                   &&
+   cp -v certs/*.pem ${SSLDIR}/certs                            &&
    c_rehash                                                     &&
-   install BLFS-ca-bundle*.crt \${SSLDIR}/ca-bundle.crt          &&
-   ln -sfv ../ca-bundle.crt \${SSLDIR}/certs/ca-certificates.crt &&
+   install BLFS-ca-bundle*.crt ${SSLDIR}/ca-bundle.crt          &&
+   ln -sfv ../ca-bundle.crt ${SSLDIR}/certs/ca-certificates.crt &&
    unset SSLDIR
    rm -r certs BLFS-ca-bundle*
 
