@@ -121,7 +121,7 @@ mount -t aufs -o br=${AUFSOPT} none ${ROOT} 2> /dev/null || \
 
 # Make required applets easier to access
 for applet in cat chmod cp cut grep ls mkdir mknod mount umount switch_root \
-    rm mv vi cpio tar mke2fs sync fdisk dd ; do
+    rm mv vi cpio tar mke2fs sync fdisk dd mdev; do
     /bin/busybox ln /bin/busybox /bin/${applet}
 done
 
@@ -173,8 +173,12 @@ mkdir -p /mnt/system
 mkdir -p /mnt/rootfs
 
 # Mount the /proc filesystem (enables filesystem detection for 'mount')
-mkdir /proc
+mkdir -p /proc
 mount -t proc proc /proc
+
+# Mount the /sys filesystem (needed for module probing)
+mkdir -p /sys
+mount -t sysfs sysfs /sys
 
 # Invoke busybox if requested via the kernel command line.
 if [ `grep -c "busybox" /proc/cmdline` -ne "0" ]; then 
@@ -187,12 +191,21 @@ else
     busybox sleep 10
 fi
 
+busybox mdev -s
+
 # Search for, and mount the boot medium
 LABEL="$(cat /boot/id_label)"
 for device in $(ls /dev); do
     [ "${device}" == "console" ] && continue
     [ "${device}" == "null"    ] && continue
     [ "${device}" == "zero"    ] && continue
+
+    case "${device}" in 
+    sd*) ;;
+    scd*) ;;
+    hd*) ;;
+    *) continue ;;
+    esac
 
     mount -o ro /dev/${device} /mnt/medium 2> /dev/null && \
     if [ "$(cat /mnt/medium/boot/${ARCH}/id_label)" != "${LABEL}" ]; then
@@ -267,7 +280,8 @@ EOF
     MOD_VER=`ls /lib/modules`
     find /lib/modules/$MOD_VER/kernel/lib -print |cpio -pdvum mnt_init
     find /lib/modules/$MOD_VER/kernel/drivers/{block,hid,scsi,usb} -print |cpio -pdvum mnt_init
-    #depmod -b mnt_init $MOD_VER
+    cp /lib/modules/$MOD_VER/modules.{builtin,order} mnt_init/lib/modules/$MOD_VER
+    depmod -b mnt_init $MOD_VER
 
     cp -v /bin/busybox mnt_init/bin
     cp init.sh mnt_init/init
