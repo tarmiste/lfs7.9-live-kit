@@ -31,37 +31,293 @@ PATCH1=""
     ldconfig
 
 cat > /etc/issue << "EOF"
-Welcome to LFS live.   
 
-To get started, login as builder (with password of builder) and read the README.LFSLIVE.USER file.
+******** Welcome to LFS live.    
+
+To get started, login as 'builder' (password is 'builder') 
+and read the README.LFSLIVE.USER file.
+
 EOF
 
 cat > /home/builder/README.LFSLIVE.USER << "EOF"
 
-This needs writing.
+Welcome to LFS live.   
 
-add yourself to the sudoers list
+LFS live is a self contained build environment that can be booted from a 
+CDROM or USB flash device and provide the tools needed to build an
+LFS or CLFS system.
+
+IMPORTANT! Building LFS (or CLFS) requires the user to partition, format, and
+peform other operations that could be damaging to existing data on the
+system.  Attempting to build LFS on a system that contains useful
+data could potentially cause loss of that useful data.   It is prudent 
+that you either build LFS on a 'burner' system (a system which 
+contains no useful data) or first make backup copies of every useful
+piece of data on the system before starting the LFS/CLFS build
+process.
+
+This image consists of a LFS 7.9 base build plus a number of additional 
+packages and scripts that are useful in contstructing an LFS/CLFS system.
+This image includes:
+
+1) The tools described in "Host System Requirements" in the LFS 7.9 book.
+2) The tools described in "Host System Requirements" in the CLFS 3.0.0 book.
+3) The tools needed to run the jhalfs tool.
+4) The tools needed to add the blfs_tool to your LFS installation.
+5) Tools needed for connecting to the internet.
+6) Copies of the LFS 7.9 book, the BLFS 7.9 book, and the jhalfs tool.
+7) The tools needed to download copies of the LFS, CLFS and other packages.
+8) A (text based) web browser and cut and paste support via mouse.
+
+This image does *NOT* include a copy of the source needed to build LFS or
+CLFS.   The needed source packages can be downloaded from the internet once
+internet connection is established or could be provided by the user via 
+a USB flash drive or other local media.
+
+The '/collateral' folder in this image contains copies of the LFS book and other
+information that may be useful to the user.
 
 
-jhalfs can be obtained by:
-svn co svn://svn.linuxfromscratch.org/ALFS/jhalfs/trunk jhalfs
+Configuring logins:
 
-Various LFS/BLFS books are available in /TBA
+The 'builder' login is intended to be used for the LFS build.  The 
+default builder user password is 'builder'.  To add builder to the sudoers
+list, as root, run visudo and add builder to the sudoer list.  Note: To run
+jhalfs, the builder login must have sudo permissions.
+
+The root login requires no password.   The root login is used for
+administrative purposes but is not used for building LFS.
 
 
- To connect to an access point that uses a password, you need to put the pre-shared key in /etc/sysconfig/wpa_supplicant-wifi0.conf. SSID is the string that the access point/router transmits to identify itself. Run the following command as the root user:
+Using the lynx browser:
+
+This live image provides a text mode browser (lynx).  Lynx can be
+started by running the command 'lynx'.  As a companion tool, the
+'GPM' mouse daemon is also provided and it allows the user to 
+cut and paste using the mouse buttons.  
+
+Lynx's default home page has been set to the local '/collateral' 
+directory.   The /collateral directory contains local copies of the
+LFS and BLFS book in html format.   And so, the LFS and BLFS books
+are available for viewing with lynx even without a network connection.
+
+Once, network connection is established, lynx can be used to browse
+the internet in text mode.
+
+Note that the /collateral directory contains local copies of the LFS
+and BLFS books but does not contain copies of the CLFS book.  When 
+building CLFS, the CLFS book must be obtained via the network or
+otherwise be provided by the user.
+
+
+
+Establishing a network connection:
+
+By default the network interfaces are not enabled at startup.   The user
+must configure networking (if networking is desired).
+
+It is not an absolute requirement that networking be enabled.  If a local 
+copy of the needed source packages is available, the user can build a LFS
+or CLFS system without a network connection.  In this case , the user
+can skip configuration of the network altogether.
+
+However, in most cases, a network connection is either needed for 
+download of source packages or is simply desired for ease of use.  And so,
+most users will need to configure a network connection.
+
+This image provides tools for connecting to wired, wireless and serial 
+(dial up) network connections.   Establishing a wired connection is 
+the best option as it is the easiest to get working.   Wireless connections
+often require external firmware (i.e. not part of this live image), 
+passwords and such and so wireless connections are often difficult to get
+working.
+
+For Wired connection:
+
+Section 7.5 of LFS7.9 may provide additional material that is useful
+for establishing a network connection....
+
+To establish a wired connection, the user must (usually) modify the 
+ifconfig.eth0 script in /etc/sysconfig and then 'ifup' the interface.
+
+First run the 'ifconfig -a' command and make note of which wired 
+connections are present in the output.   If the output shows 'eth0' as
+the wired connections, then simply execute the command 'ifup eth0' and
+after a few seconds, the network connection should be up.  e.g. do:
+
+ifup eth0
+
+If the wired connection is not named 'eth0' (and it usually won't be),
+then the user must rename /etc/sysconfig/ifconfig.eth0 file to end
+with the wired connection name and also modify the contents of the file
+to replace 'eth0' with the wired connection name.   As an example, if
+'ifconfig -a' shows that 'enp0s7' is the name of the wired connection
+then do:
+
+cd /etc/sysconfig
+mv ifconfig.eth0 ifconfig.enp0s7
+vi ifconfig.enp0s7
+:1,$s/eth0/enp0s7/
+:w
+:q
+
+The connection will be configured with dhcp.   If static IP is desired,
+the ifconfig.xxx file may be modified to obtain a static IP instead.
+
+The wired connection can be confirmed by pinging:
+
+ping 8.8.8.8
+ping ftp.kernel.org
+
+Note: The live image sets /etc/resolv.conf to point to the Google name server
+(8.8.8.8).   This should work for most situations.  However if
+a different nameserver is needed or desired, then modify /etc/resolv.conf
+as needed.
+
+
+For Wireless connection:
+
+This live image provides the wireless-tools and wpa-supplicant tool
+to help establish a wireless connection.   The user may find the 
+'wpa-supplicant' section of the BLFS book to be useful in establishing
+a wireless connection.
+
+Establishing a wireless connection often requires the user to provide 
+external firmware that is needed by the wireless driver.  This live image
+contains all the firmware that is available in the kernel source package
+but no firmware other than the kernel provided.   If external firmware
+is required, then it must be obtained and added to the /lib/firmware
+directory in this live image.
+
+This live image defaults to a wireless name of 'wifi0'.  The actual name
+of the wireless interface on the system will likely be different than 
+'wifi0'.   Determine the name of the wireless interface on the system
+by doing:
+
+'ifconfig -a' and finding the name of the wireless interface in the output.
+Several configration files must be modified to reflect the actual
+name of the wireless interface.
+
+To establish a wireless connection, provide the wireless network
+name and password.   e.g.:
 
 wpa_passphrase SSID SECRET_PASSWORD > /etc/sysconfig/wpa_supplicant-wifi0.conf
 
-/etc/sysconfig/wpa_supplicant-wifi0.conf can hold the details of several access points. When wpa_supplicant is started, it will scan for the SSIDs it can see and choose the appropriate password to connect.
+(Remember to use the actual name of the wireless interface instead of 'wifi0')
 
-If you want to connect to an access point that isn't password protected, put an entry like this in /etc/sysconfig/wpa_supplicant-wifi0.conf. Replace "Some-SSID" with the SSID of the access point/router.
+To establish a wired connection, the user must (usually) modify the 
+ifconfig.wifi0 script in /etc/sysconfig and then 'ifup' the interface.
 
-network={
-  ssid="Some-SSID"
-  key_mgmt=NONE
-}
+First run the 'ifconfig -a' command and make note of which wired 
+connections are present in the output.   If the output shows 'wifi0' as
+the wired connections, then simply execute the command 'ifup wifi0' and
+after a few seconds, the network connection should be up.  e.g. do:
 
+ifup wifi0
+
+If the wired connection is not named 'wifi0' (and it usually won't be),
+then the user must rename /etc/sysconfig/ifconfig.wifi0 file to end
+with the wired connection name and also modify the contents of the file
+to replace 'wifi0' with the wired connection name.   As an example, if
+'ifconfig -a' shows that 'mlan0' is the name of the wired connection
+then do:
+
+cd /etc/sysconfig
+mv ifconfig.wifi0 ifconfig.mlan0
+vi ifconfig.mlan0
+:1,$s/wifi0/mlan0/
+:w
+:q
+
+The wireless connection can be confirmed by pinging:
+
+ping 8.8.8.8
+ping ftp.kernel.org
+
+
+For Dialup connection:
+
+This live image provides pppd.  XXX This needs work.
+
+
+Remote login:
+
+This live image includes a sshd server.  This allows the user
+to login to the LFS live system from a remote machine.  The remote
+machine may have browsers and other tools that make the LFS build
+easier to perform remotely than it otherwise would be from a local
+console on the LFS live system.
+
+Once a network connection is established, from the remote machine, do:
+
+ssh IPADDRESSOFLIVE -l builder
+
+Note: it is not possible to ssh into the live system as 'root' user.
+
+
+
+Using jhalfs:
+
+This live image provides a local copy of the jhalfs tool (in /collateral).
+jhalfs is a tool which automates much of the building of LFS/BLFS and CLFS.
+
+The local copy of jhalfs is a snapshot of the jhalfs code as it existed
+at the time of the LFS 7.9 release.   It will function properly for
+building the LFS 7.9 release but may not work for building releases 
+other than LFS 7.9.   If a more recent copy of jhalfs is required by
+the user, then it may be downloaded as follows:
+
+svn co svn://svn.linuxfromscratch.org/ALFS/jhalfs/trunk jhalfs
+
+If the local copy of jhalfs is acceptable, then simply extract it 
+from the tarball in /collateral.
+
+Run jhalfs by doing:
+
+cd jhalfs
+make clean
+make
+
+Configure your desired build options and let it run.
+
+jhalfs requires a copy of the LFS book.  Normally, jhalfs will download
+the LFS book.  However when building on a system with no internet connection,
+a local copy of the book (and all the LFS source packages) must be 
+provides by the user.   A local copy of the LFS 7.9 book (in xml format) can
+be found in /collateral.   To use the local copy of the LFS book, 
+unpack it and then point jhalfs to it by selecting it as the 'working copy'
+
+This live image provides the tools needed by the 'blfs_tools' option
+in jhalfs.   blfs_tools provides for semiautomated build of BLFS 
+packages in the completed LFS system.   However, the blfs_tool 
+selection will cause the BLFS book be downloaded and so requires
+a network connection to function properly.
+
+
+Injecting the live image to hard drive:
+
+Normally, the live image will be run from the live media and not become
+part of the local hard drive.  However, if desired, it can be injected 
+into a hard drive partition and then be booted from hard disk intead of
+the live media.  If installing the live image onto hard drive is 
+desired, boot up the live image and do:
+
+1) Identify a free hard drive partition and format it.   
+2) mount the free partition at a mount point (/mnt/hd for example).
+3) cd /mnt/.boot/system
+4) find . -print |cpio -pdvum /mnt/hd 
+5) vi /mnt/hd/etc/fstab and modify mount point for the selected partition.
+6) Modify your system bootloader config files as needed to boot
+   the kernel found in /mnt/hd/boot and the selected partition.
+
+Then reboot and select the proper boot option to startup the live
+image installed on hard disk.
+
+Running the live image from hard drive allows the user configurations
+(network and such) to be retained through reboot and also frees up the 
+CD drive for other uses during the LFS build. 
+
+01Apr2016
 
 EOF
 
