@@ -121,7 +121,7 @@ mount -t aufs -o br=${AUFSOPT} none ${ROOT} 2> /dev/null || \
 
 # Make required applets easier to access
 for applet in cat chmod cp cut grep ls mkdir mknod mount umount switch_root \
-    rm mv vi cpio tar mke2fs sync fdisk dd mdev; do
+    rm mv vi cpio tar mke2fs sync fdisk dd mdev uname; do
     /bin/busybox ln /bin/busybox /bin/${applet}
 done
 
