@@ -41,7 +41,7 @@ case $(uname -m) in
 esac
 
 make
-#make -k test || true
+make test
 #sed -i 's# libcrypto.a##;s# libssl.a##' Makefile   # why is this commented?
 make MANDIR=/usr/share/man MANSUFFIX=ssl install &&
 install -dv -m755 /usr/share/doc/openssl-1.0.2g  &&

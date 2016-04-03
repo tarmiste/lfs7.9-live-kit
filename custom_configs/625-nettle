@@ -18,7 +18,7 @@ PATCH1=""
 ( cat << "xEOFx"
    ./configure --prefix=/usr &&
    make
-   #make -k check || true
+   make check
    make -j1 install &&
    chmod   -v   755 /usr/lib/lib{hogweed,nettle}.so &&
    install -v -m755 -d /usr/share/doc/nettle-3.2 &&
