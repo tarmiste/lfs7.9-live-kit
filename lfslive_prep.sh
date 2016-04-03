@@ -30,6 +30,7 @@ fi
 # 2) check for host squashfs-tools and genisoimage.
 # 3) check that user is not root and has needed permissions to
 #   perform the build
+# 4) Check that memory size/swap space is adequate.
 #
 
 
@@ -46,7 +47,6 @@ case $(uname -m) in
     ppc* ) cp extras/yaboot_binary_deb_1.3.16-4.tar.xz $LFS/sources  
     ;;
 esac
-echo ddddddd
 
 #
 # Create a folder in the LFS target directory and populate it with 
@@ -65,8 +65,6 @@ case $(uname -m) in
     ;;
 esac
 
-echo eeeeeeee
-
 #
 # Create a host folder for the LFS live build and populate it with the materials 
 # needed by the live builder.
@@ -75,7 +73,7 @@ mkdir $LFS_HOST
 
 # jhalfs
 cp extras/jhalfs_20160310_r3858.tar.gz $LFS_HOST
-tar xvf extras/jh* -C $LFS_HOST
+tar xf extras/jh* -C $LFS_HOST
 
 # kernel config
 case $(uname -m) in
@@ -97,32 +95,15 @@ case $(uname -m) in
     ;;
 esac
 
-
-cat > $LFS_HOST/README << "EOF"
-
-Do:
-
-Add more description...
-
-cd jhalfs
-make clean
-make
-
-Configure jhalfs and kick off the live build.   Upon 
-succesful completion of the build,  run the 3 host scripts
-in $LFS/host_scripts:
-
-
-and the live image is then ready.
-EOF
-
+cp LFSLIVE.README.BUILDER $LFS_HOST
 
 echo
 echo THe LFS live build preperation step is complete.  
 echo ${LFS} is the LFS live target build area.
 echo ${LFS_HOST} is the LFS host build area.
 echo
-echo next do 'cd ${LFS_HOST}' and see the README file in that directory
+echo next do \'cd ${LFS_HOST}\' 
+echo and see the LFSLIVE.README.BUILDER file in that directory
 echo
 
 exit
