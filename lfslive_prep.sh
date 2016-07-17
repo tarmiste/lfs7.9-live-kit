@@ -30,6 +30,11 @@ fi
 # 2) check for host squashfs-tools and genisoimage.
 # 3) check that user is not root and has needed permissions to
 #   perform the build
+if [[$EUID = 0]]
+then
+    echo This script should not be run as root!
+    exit 1
+fi
 # 4) Check that memory size/swap space is adequate.
 #
 
